@@ -30,7 +30,8 @@ export class AuthController {
 
     @UseGuards(AuthGuard('jwt-refresh-token')) // has to be the same as the one in the refresh token strategy
     @Post('/refreshtoken')
-    refreshtoken() {
-        return this.authService.refreshtoken();
+    refreshtoken(@Req() request: Request): Promise<Tokens> {
+        const user = request.user;
+        return this.authService.refreshtoken(user['sub'], user['refreshToken']);
     }
 }

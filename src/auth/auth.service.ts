@@ -107,7 +107,27 @@ export class AuthService {
         });
     }
 
-    async refreshtoken() {
-        return 'refreshtoken';
+    async refreshtoken(userId: string, refreshToken: string): Promise<Tokens> {
+        const user = await this.databaseservice.user.findUnique({
+            where: {
+                id: userId
+            }
+        });
+
+        if (!user) {
+            throw new HttpException('Access Denied', HttpStatus.BAD_REQUEST);
+        }
+
+        const isRefreshTokenValid = await bcrypt.compare(refreshToken, user.hashedRT);
+
+        if (!isRefreshTokenValid) {
+            throw new HttpException('Invalid refresh token', HttpStatus.BAD_REQUEST);
+        }
+
+        const tokens = await this.generateTokens(user.id, user.email);
+
+        await this.updateRThash(user.id, tokens.refreshToken);
+
+        return tokens;
     }
 }
