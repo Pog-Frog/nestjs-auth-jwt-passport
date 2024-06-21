@@ -72,8 +72,28 @@ export class AuthService {
         return tokens;
     }
 
-    async signin() {
-        return 'signin';
+    async signin(dto: AuthDto): Promise<Tokens> {
+        const user = await this.databaseservice.user.findUnique({
+            where: {
+                email: dto.email
+            }
+        });
+
+        if (!user) {
+            throw new HttpException('Invalid email or password', HttpStatus.BAD_REQUEST);
+        }
+
+        const isPasswordValid = await bcrypt.compare(dto.password, user.hashedPassword);
+
+        if (!isPasswordValid) {
+            throw new HttpException('Invalid email or password', HttpStatus.BAD_REQUEST);
+        }
+
+        const tokens = await this.generateTokens(user.id, user.email);
+
+        await this.updateRThash(user.id, tokens.refreshToken);
+
+        return tokens;
     }
 
     async signout() {
