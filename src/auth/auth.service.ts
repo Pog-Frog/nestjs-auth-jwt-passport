@@ -96,8 +96,15 @@ export class AuthService {
         return tokens;
     }
 
-    async signout() {
-        return 'signout';
+    async signout(userId: string): Promise<void> {
+        await this.databaseservice.user.update({
+            where: {
+                id: userId
+            },
+            data: {
+                hashedRT: null
+            }
+        });
     }
 
     async refreshtoken() {
