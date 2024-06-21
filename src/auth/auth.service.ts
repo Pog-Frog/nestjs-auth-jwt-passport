@@ -53,7 +53,7 @@ export class AuthService {
         });
 
         if (userExists) {
-            throw new HttpException('User already exists', HttpStatus.BAD_REQUEST);
+            throw new HttpException('This email is taken already', HttpStatus.BAD_REQUEST);
         }
 
         const hashedPassword = await this.hashData(user.password);
